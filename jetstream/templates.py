@@ -25,12 +25,10 @@ class TemplateContext:
 
     low priority  --> 1) Project: jetstream/config.yaml
                       2) Pipeline: pipeline.yaml: template_config_data section
-                      3) Other Args: Any extra arguments to be injected into the template context, 
-                                     such as the backend selected by the user
     high priority --> 3) Command Args: -c/--config and -C/--config-file options
 
     """
-    def __init__(self, *, project=None, pipeline=None, other_args=None, command_args=None):
+    def __init__(self, *, project=None, pipeline=None, command_args=None, other_args=None):
         self.sources = []
         self.stack = []
 
@@ -192,7 +190,7 @@ def from_string(data, *searchpath, **kwargs):
     return env.from_string(data)
 
 
-def render_template(template, project=None, pipeline=None, other_args=None, command_args=None):
+def render_template(template, project=None, pipeline=None, command_args=None, other_args=None):
     """Render a template and return as a string"""
     log.info('Rendering template...')
 
