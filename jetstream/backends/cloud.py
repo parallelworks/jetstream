@@ -132,7 +132,7 @@ class CloudSwiftBackend(BaseBackend):
         # Instantiate a cloud storage provider
         storage_class = dynamic_import(CLOUD_STORAGE_PROVIDERS[cloud_storage_provider])
         self.cloud_storage = storage_class(
-            **kwargs[storage_class.config_key]
+            **kwargs.get(storage_class.config_key, dict())
         )
         
         # Initialize cloud metrics log

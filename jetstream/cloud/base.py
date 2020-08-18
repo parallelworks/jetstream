@@ -7,7 +7,8 @@ import urllib
 import time
 
 CLOUD_STORAGE_PROVIDERS = {
-    'azure': 'jetstream.cloud.azure.AzureStorageSession'
+    'azure': 'jetstream.cloud.azure.AzureStorageSession',
+    'aws': 'jetstream.cloud.aws_s3.AWSS3StorageSession'
 }
 
 
