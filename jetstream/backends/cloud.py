@@ -138,6 +138,9 @@ class CloudSwiftBackend(BaseBackend):
         # Initialize cloud metrics log
         CloudMetricsLogger.init(at=os.path.join(self.project_dir, 'cloud_metrics_{}.yaml'.format(datetime.now().strftime('%Y%m%d%H%M%S'))))
         
+        # Get path to Petalink library, if it exists
+        self.petalink_so_path = kwargs.get('petalink_path', '/usr/lib/petalink.so')
+        
         log.info(f'CloudSwiftBackend initialized with {self.total_cpus_in_pool} cpus')
 
     async def spawn(self, task):
@@ -152,6 +155,12 @@ class CloudSwiftBackend(BaseBackend):
                 task_requested_cpus, self.total_cpus_in_pool
             ))
             return task.fail(1)
+        
+        # Inject Petalink library
+        task.directives['cmd'] = (
+            f'if [[ -f "{self.petalink_so_path}" ]]; '
+            f'then export LD_PRELOAD={self.petalink_so_path}; fi;\n\n'
+        ) + task.directives['cmd']
         
         # Determine whether this task should be run locally or on a remote cloud worker
         is_local_task = task.directives.get('cloud_args', dict()).get('local_task', False)
