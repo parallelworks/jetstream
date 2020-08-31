@@ -40,6 +40,10 @@ def get_pool_info(pool_name, api_key, pworks_url="http://beta.parallel.works"):
     for pool_data in rq.json():
         if pool_data['name'] == pool_name:
             log.info('Got pooldata: {}'.format(pool_data))
+            try:
+                cpus = int(pool_data['info']['cpuPerWorker']) // pool_data['settings']['jobsPerNode']
+            except:
+                cpus = 8
             return {
                 'serviceport': pool_data['info']['ports']['serviceport'],
                 'controlport': pool_data['info']['ports']['controlport'],
@@ -47,8 +51,10 @@ def get_pool_info(pool_name, api_key, pworks_url="http://beta.parallel.works"):
                 # TODO Sometimes the pool information doesn't contain the info needed for this calculation, but 
                 # it isn't really necessary to have anyway
                 # 'cpus': int(pool_data['info']['cpuPerWorker']) // pool_data['settings']['jobsPerNode']
-                'cpus': 8
+                'cpus': cpus
             }
+    else:
+        raise Exception('Could not get pool info, likely invalid name')
 
 
 def parse_reference_input(ref_input_directive):
@@ -152,6 +158,13 @@ class CloudSwiftBackend(BaseBackend):
                 task_requested_cpus, self.total_cpus_in_pool
             ))
             return task.fail(1)
+        
+        # Add in the pre- and post-hooks into the task body
+        task.directives['cmd'] = (
+            self.cloud_storage.task_cmd_prehook() + '\n'
+            + task.directives['cmd'] + '\n'
+            + self.cloud_storage.task_cmd_posthook()
+        )
         
         # Determine whether this task should be run locally or on a remote cloud worker
         is_local_task = task.directives.get('cloud_args', dict()).get('local_task', False)
@@ -277,6 +290,7 @@ class CloudSwiftBackend(BaseBackend):
             
             # Get task runtime and which node it ran on
             elapsed_time = datetime.now() - start_time
+            hostname = 'UNAVAILABLE'
             try:
                 with open(f'.{task.name}.hostname', 'r') as hostname_log:
                     hostname = hostname_log.read().strip()

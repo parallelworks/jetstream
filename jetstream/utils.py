@@ -588,7 +588,7 @@ def construct_cjs_cmd(task_body, service_url, cloud_storage=None, cjs_stagein=No
     if singularity_container_uri is None:
         task_body_cmd = 'bash {}.sh >>{} 2>>{}'.format(task_name, remote_stdout_path, remote_stderr_path) 
     else:
-        task_body_cmd = 'singularity exec --cleanenv --nv {container_uri} bash {task_name}.sh >>{remote_stdout_path} 2>>{remote_stderr_path}'.format(
+        task_body_cmd = 'singularity exec --cleanenv --nv --bind /mnt:/mnt {container_uri} bash {task_name}.sh >>{remote_stdout_path} 2>>{remote_stderr_path}'.format(
             container_uri=path_conversion(singularity_container_uri),
             task_name=task_name,
             remote_stdout_path=remote_stdout_path,

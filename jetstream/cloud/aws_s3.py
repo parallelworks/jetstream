@@ -134,3 +134,9 @@ class AWSS3StorageSession(CloudStorageSession):
             )
             
         return remote_upload_cmd
+    
+    def task_cmd_prehook(self):
+        return ''
+    
+    def task_cmd_posthook(self):
+        return ''

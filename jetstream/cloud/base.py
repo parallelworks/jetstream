@@ -8,7 +8,9 @@ import time
 
 CLOUD_STORAGE_PROVIDERS = {
     'azure': 'jetstream.cloud.azure.AzureStorageSession',
-    'aws': 'jetstream.cloud.aws_s3.AWSS3StorageSession'
+    'aws': 'jetstream.cloud.aws_s3.AWSS3StorageSession',
+    'shared_nfs': 'jetstream.cloud.shared_nfs.SharedNFSStorage'
+    
 }
 
 
@@ -98,4 +100,20 @@ class CloudStorageSession(ABC):
     
     @abstractmethod
     def download_blob(self, filepath, blobpath=None, container=None):
+        raise NotImplementedError
+    
+    @abstractmethod
+    def task_cmd_prehook(self):
+        raise NotImplementedError
+    
+    @abstractmethod
+    def task_cmd_posthook(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    def remote_upload_cmd(self, remote_uploads_filepaths=None):
+        raise NotImplementedError
+    
+    @abstractmethod
+    def remote_download_cmd(self, remote_downloads_blobs=None):
         raise NotImplementedError
