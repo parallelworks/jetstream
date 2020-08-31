@@ -193,6 +193,12 @@ class AzureStorageSession(CloudStorageSession):
                 --account-key {self.storage_account_key} 
         """).split()
         subprocess.check_output(cmd)
+    
+    def task_cmd_prehook(self):
+        return ''
+    
+    def task_cmd_posthook(self):
+        return ''
         
     def close(self):
         if not self.storage_account_key:
