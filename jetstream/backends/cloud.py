@@ -144,6 +144,9 @@ class CloudSwiftBackend(BaseBackend):
         # Initialize cloud metrics log
         CloudMetricsLogger.init(at=os.path.join(self.project_dir, 'cloud_metrics_{}.yaml'.format(datetime.now().strftime('%Y%m%d%H%M%S'))))
         
+        # Get path to Petalink library, if it exists
+        self.petalink_so_path = kwargs.get('petalink_path', '/usr/lib/petalink.so')
+        
         log.info(f'CloudSwiftBackend initialized with {self.total_cpus_in_pool} cpus')
 
     async def spawn(self, task):
@@ -161,7 +164,9 @@ class CloudSwiftBackend(BaseBackend):
         
         # Add in the pre- and post-hooks into the task body
         task.directives['cmd'] = (
-            self.cloud_storage.task_cmd_prehook() + '\n'
+            f'if [[ -f "{self.petalink_so_path}" ]]; '
+            + f'then export LD_PRELOAD={self.petalink_so_path}; fi;\n\n'
+            + self.cloud_storage.task_cmd_prehook() + '\n'
             + task.directives['cmd'] + '\n'
             + self.cloud_storage.task_cmd_posthook()
         )
